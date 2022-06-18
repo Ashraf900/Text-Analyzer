@@ -19,35 +19,41 @@ def index (request):
 
 
 def analyze (request):
-    djtext = request.GET.get('text', 'default')
-    removepunc = request.GET.get('removepunc', 'off')
-    fullcaps = request.GET.get('fullcaps', 'off')
-    lineremover = request.GET.get('lineremover', 'off')
-    spaceremover = request.GET.get('spaceremover', 'off')
-    charcounter = request.GET.get('charcounter', 'off')
-    #analyzed = djtext
+    djtext = request.POST.get('text', 'default')
+    removepunc = request.POST.get('removepunc', 'off')
+    fullcaps = request.POST.get('fullcaps', 'off')
+    lineremover = request.POST.get('lineremover', 'off')
+    spaceremover = request.POST.get('spaceremover', 'off')
+    charcounter = request.POST.get('charcounter', 'off')
+    
     if removepunc == "on":
-        punctuations = ''':;()[]-?/&*%$#@!^_~"'|><'''
+        punctuations = ''':;()[]-?/&\,*%$#@!^_~"'|><'''
         analyzed = ""
         for char in djtext:
             if char not in punctuations:
-                analyzed = analyzed+char
+                analyzed = analyzed + char
         params = {'purpose': 'Removed punctuations', 'analyzed_text': analyzed }
-        return render(request, 'analyze.html' , params )
-    elif(fullcaps == "on"):
+        djtext = analyzed
+        
+    
+    if fullcaps == "on":
         analyzed = ""
         for char in djtext:
             analyzed = analyzed + char.upper() 
         params = {'purpose': 'Capitalized Text', 'analyzed_text': analyzed }
-        return render(request, 'analyze.html' , params )
-    elif (lineremover == "on"):
+        djtext = analyzed
+        
+    
+    if lineremover == "on":
         analyzed = ""
         for char in djtext:
-            if char != "\n":
+            if char != "\n" and char!= "\r":
                 analyzed = analyzed + char
         params = {'purpose': 'Remove New Line', 'analyzed_text': analyzed}
-        return render (request, 'analyze.html', params)
-    elif(spaceremover == "on"):
+        djtext = analyzed
+        
+    
+    if spaceremover == "on":
         analyzed = ""
         for index, char in enumerate(djtext):
             if djtext[index] == " " and djtext[index + 1] == " " :
@@ -55,28 +61,19 @@ def analyze (request):
             else:   
                 analyzed = analyzed+char
 
+        
         params = {'purpose': 'Removed Space ', 'analyzed_text': analyzed }
-        return render(request, 'analyze.html' , params )
-
-    elif(charcounter == "on"):
+        djtext = analyzed
+       
+    if charcounter == "on":
         analyzed = 0
         for char in djtext:
             analyzed = analyzed + 1
         
         params = {'purpose': 'character counter', 'analyzed_text': analyzed }
-        return render(request, 'analyze.html' , params )
-    else:
-        return HttpResponse ('ERROR')
+        
 
-# def Capitalize (request):
-#     return HttpResponse('CapFirst')
-
-# def newlineremove (request):
-#     return HttpResponse('newlineremove')
-
-# def spaceremove (request):
-#     return HttpResponse('spaceremove')
-
-# def charcount (request):
-#     return HttpResponse('charcount')
-
+    if (removepunc != "on" and lineremover !="on" and spaceremover != "on" and fullcaps != "on" and charcounter != "on"):
+        return HttpResponse("ERROR: please select any operation!")
+    
+    return render(request, 'analyze.html' , params )
